@@ -1,0 +1,19 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "rob@vees.net",
+    "longName": "Progress Bars",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "shortName": "Progress Bars",
+    "uuid": "4ad9fafc-688c-4222-ab64-51f120c7cdfa",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
