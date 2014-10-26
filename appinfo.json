@@ -7,7 +7,13 @@
     "longName": "Progress Bars",
     "projectType": "native",
     "resources": {
-        "media": []
+        "media": [
+            {
+                "file": "images/face_bg.png",
+                "name": "CLOCKFACE",
+                "type": "png"
+            }
+        ]
     },
     "shortName": "Progress Bars",
     "uuid": "4ad9fafc-688c-4222-ab64-51f120c7cdfa",
