@@ -2,15 +2,15 @@
 
 static Window *window;
 
-static TextLayer *text_layer_1, *text_layer_2;
+static TextLayer *text_layer_1;
 
-static char time_buffer[16], log_buffer[256];
+static char time_buffer[32], log_buffer[256];
 
 static char *longitude, *latitude;
 
 static Layer *background_layer;
-static BitmapLayer *b_clockface_layer, *w_clockface_layer;
-static GBitmap *b_clockface_image, *w_clockface_image;
+static BitmapLayer *w_clockface_layer;
+static GBitmap *w_clockface_image; 
 
 static Layer *bar_1, *bar_2, *bar_3;
 
@@ -36,12 +36,13 @@ static void in_received_handler(DictionaryIterator *message, void *context) {
     latitude = (char*)dict_find(message, 2)->value;
   }
   APP_LOG(APP_LOG_LEVEL_DEBUG, "PEBBLE: got %s", latitude);
-  snprintf(time_buffer, 7, latitude);
+  snprintf(time_buffer, sizeof("12.1234, -12.1234\nTest"), "%s, %s\nTest", latitude, longitude);
+  //snprintf(temp_buffer, sizeof("-123\u00B0"), "%d\u00B0", temperature);
   text_layer_set_text(text_layer_1, time_buffer);
 }
 
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
-  snprintf(log_buffer, 64, "PEBBLE: Failed to Send: reason %d", (int) reason);
+  snprintf(log_buffer, 64, "PEBBLE: Failed to Send: reason %d", (int)reason);
   APP_LOG(APP_LOG_LEVEL_DEBUG, log_buffer);
 }
 
