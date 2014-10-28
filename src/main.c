@@ -2,7 +2,7 @@
 
 static Window *window;
 
-static TextLayer *text_layer;
+static TextLayer *text_layer_1, *text_layer_2;
 
 static char time_buffer[16], log_buffer[256];
 
@@ -13,6 +13,8 @@ static BitmapLayer *b_clockface_layer, *w_clockface_layer;
 static GBitmap *b_clockface_image, *w_clockface_image;
 
 static Layer *bar_1, *bar_2, *bar_3;
+
+static const int timezone_offset = -4;
 
 /*
 bar1 2,2 141,13
@@ -34,6 +36,8 @@ static void in_received_handler(DictionaryIterator *message, void *context) {
     latitude = (char*)dict_find(message, 2)->value;
   }
   APP_LOG(APP_LOG_LEVEL_DEBUG, "PEBBLE: got %s", latitude);
+  snprintf(time_buffer, 7, latitude);
+  text_layer_set_text(text_layer_1, time_buffer);
 }
 
 static void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
@@ -71,7 +75,8 @@ static void bar_1_draw(Layer *layer, GContext *ctx) {
 
     time_t now = time(NULL);
     int16_t width_by_time = (bounds.size.w * (now % 60)) / 60; 
-  
+    //if (bounds.size.w - 1 == width_by_time) { width_by_time = bounds.size.w; }
+
     GRect timebound = GRect(bounds.origin.x,bounds.origin.y, width_by_time, bounds.size.h);  
   
     // Draw a black filled rectangle with sharp corners
@@ -85,6 +90,8 @@ static void bar_2_draw(Layer *layer, GContext *ctx) {
     time_t now = time(NULL);
     int16_t width_by_time = (bounds.size.w * ((now/60) % 60)) / 60; 
   
+    //if (bounds.size.w - 1 == width_by_time) { width_by_time = bounds.size.w; }
+  
     GRect timebound = GRect(bounds.origin.x,bounds.origin.y, width_by_time, bounds.size.h);  
   
     // Draw a black filled rectangle with sharp corners
@@ -96,8 +103,9 @@ static void bar_3_draw(Layer *layer, GContext *ctx) {
     GRect bounds = layer_get_bounds(layer);
 
     time_t now = time(NULL);
-    int16_t width_by_time = (bounds.size.w * ((now/3600) % 60)) / 60; 
-  
+    int hour = ((((now/3600) % 24) + 24 + timezone_offset) % 24);
+    int16_t width_by_time = (bounds.size.w * hour) / 24; 
+    //if (bounds.size.w - 1 == width_by_time) { width_by_time = bounds.size.w; }
     GRect timebound = GRect(bounds.origin.x,bounds.origin.y, width_by_time, bounds.size.h);  
   
     // Draw a black filled rectangle with sharp corners
@@ -120,17 +128,24 @@ static void window_load(Window *window) {
   bitmap_layer_set_compositing_mode(w_clockface_layer, GCompOpAssign);
   layer_add_child(background_layer, bitmap_layer_get_layer(w_clockface_layer));
   
-  bar_1 = layer_create(GRect(2,2,140,12));
+  bar_1 = layer_create(GRect(2,2,141,12));
   layer_add_child(background_layer, bar_1);
   layer_set_update_proc(bar_1, bar_1_draw);    
 
-  bar_2 = layer_create(GRect(2,21,140,12));
+  bar_2 = layer_create(GRect(2,21,141,12));
   layer_add_child(background_layer, bar_2);
   layer_set_update_proc(bar_2, bar_2_draw);   
   
-  bar_3 = layer_create(GRect(2,41,140,12));
+  bar_3 = layer_create(GRect(2,41,141,12));
   layer_add_child(background_layer, bar_3);
   layer_set_update_proc(bar_3, bar_3_draw);   
+  
+  text_layer_1 = text_layer_create(GRect(1,135,142,31));
+  text_layer_set_font(text_layer_1, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  text_layer_set_text_color(text_layer_1, GColorBlack);
+  text_layer_set_background_color(text_layer_1, GColorWhite);
+  text_layer_set_text_alignment(text_layer_1, GTextAlignmentCenter);
+  layer_add_child(background_layer, text_layer_get_layer(text_layer_1));
   
   time_t now = time(NULL);
   struct tm *startup_time = gmtime(&now);
@@ -181,7 +196,7 @@ static void init() {
 }
 
 static void deinit() {
-  text_layer_destroy(text_layer);
+  text_layer_destroy(text_layer_1);
   window_destroy(window);
 }
 
